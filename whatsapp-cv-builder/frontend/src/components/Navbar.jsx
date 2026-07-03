@@ -25,13 +25,15 @@ const Navbar = () => {
             <LayoutDashboard size={18} />
             <span>Dashboard</span>
           </Link>
-          <Link
-            to="/create-job"
-            className={`nav-link ${isActive('/create-job') ? 'active' : ''}`}
-          >
-            <PlusCircle size={18} />
-            <span>Create Job</span>
-          </Link>
+          {user?.role === 'employer' && (
+            <Link
+              to="/create-job"
+              className={`nav-link ${isActive('/create-job') ? 'active' : ''}`}
+            >
+              <PlusCircle size={18} />
+              <span>Create Job</span>
+            </Link>
+          )}
           <Link
             to="/view-jobs"
             className={`nav-link ${isActive('/view-jobs') ? 'active' : ''}`}

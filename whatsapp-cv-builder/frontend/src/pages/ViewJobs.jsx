@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Plus, Trash2, MapPin, Calendar, DollarSign, Briefcase } from 'lucide-react';
 
 const ViewJobs = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
@@ -65,20 +67,28 @@ const ViewJobs = () => {
 
       <div className="table-actions">
         <span className="results-count">{jobs.length} Listings Found</span>
-        <button onClick={() => navigate('/create-job')} className="btn btn-primary add-job-btn">
-          <Plus size={18} />
-          <span>Add New Job</span>
-        </button>
+        {user?.role === 'employer' && (
+          <button onClick={() => navigate('/create-job')} className="btn btn-primary add-job-btn">
+            <Plus size={18} />
+            <span>Add New Job</span>
+          </button>
+        )}
       </div>
 
       {jobs.length === 0 ? (
         <div className="empty-state glass-card">
           <Briefcase size={48} className="empty-icon" />
           <h3>No Job Listings Found</h3>
-          <p>Get started by creating your first job listing today.</p>
-          <button onClick={() => navigate('/create-job')} className="btn btn-primary empty-btn">
-            Create Job
-          </button>
+          {user?.role === 'employer' ? (
+            <>
+              <p>Get started by creating your first job listing today.</p>
+              <button onClick={() => navigate('/create-job')} className="btn btn-primary empty-btn">
+                Create Job
+              </button>
+            </>
+          ) : (
+            <p>Check back later for new job opportunities.</p>
+          )}
         </div>
       ) : (
         <div className="jobs-list">
@@ -116,14 +126,16 @@ const ViewJobs = () => {
                     <span>Added {job.createdAt}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(job.id)}
-                  className="delete-job-btn"
-                  title="Delete Listing"
-                >
-                  <Trash2 size={18} />
-                  <span>Delete</span>
-                </button>
+                {user?.role === 'employer' && (
+                  <button
+                    onClick={() => handleDelete(job.id)}
+                    className="delete-job-btn"
+                    title="Delete Listing"
+                  >
+                    <Trash2 size={18} />
+                    <span>Delete</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
