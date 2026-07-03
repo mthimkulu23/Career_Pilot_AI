@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import Onboarding from '../components/Onboarding';
 import ProfileSkills from '../components/ProfileSkills';
 import JobMatcher from '../components/JobMatcher';
-import AICoach from '../components/AICoach';
 
 const CandidateDashboard = () => {
   const { user } = useAuth();
@@ -32,7 +31,6 @@ const CandidateDashboard = () => {
   const loadUserData = async () => {
     setIsLoading(true);
     try {
-      // In a real app, these would be API calls
       const savedProfile = localStorage.getItem(`profile_${user?.email}`);
       const savedJobs = localStorage.getItem(`jobs_${user?.email}`);
       const savedHustles = localStorage.getItem(`hustles_${user?.email}`);
@@ -55,37 +53,23 @@ const CandidateDashboard = () => {
     setUserProfile(profileData);
     setHasCompletedOnboarding(true);
     setShowOnboarding(false);
-    
-    // Load additional data after onboarding
+
     loadUserData();
   };
 
-  const handleAIMessage = async (message, profile) => {
-    // In a real app, this would call an AI API
-    // For now, return a placeholder response
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve("I'm here to help with your career questions. Connect me to an AI backend for personalized responses based on your profile.");
-      }, 1000);
-    });
-  };
-
   const handleProfileUpdate = async (updatedData) => {
-    // In a real app, this would call an API to update the profile
-    // For now, update the local state and localStorage
     try {
       const updatedProfile = {
         ...userProfile,
-        experience: updatedData.method === 'upload' 
-          ? 'CV updated: ' + (updatedData.file?.name || 'New file uploaded')
-          : (updatedData.rawText || userProfile.experience),
-        lastUpdated: new Date().toISOString()
+        experience:
+          updatedData.method === 'upload'
+            ? 'CV updated: ' + (updatedData.file?.name || 'New file uploaded')
+            : updatedData.rawText || userProfile.experience,
+        lastUpdated: new Date().toISOString(),
       };
-      
+
       setUserProfile(updatedProfile);
       localStorage.setItem(`profile_${user?.email}`, JSON.stringify(updatedProfile));
-      
-      // Reload other data that might be affected by profile update
       loadUserData();
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -96,7 +80,7 @@ const CandidateDashboard = () => {
     return (
       <div className="dashboard-container">
         <div className="loading-state">
-          <div className="spinner"></div>
+          <div className="spinner" />
           <p>Loading your dashboard...</p>
         </div>
         <style>{`
@@ -147,7 +131,7 @@ const CandidateDashboard = () => {
             </div>
 
             <div className="main-section">
-              <JobMatcher 
+              <JobMatcher
                 matchedJobs={matchedJobs}
                 sideHustles={sideHustles}
                 careerPath={careerPath}
@@ -155,10 +139,7 @@ const CandidateDashboard = () => {
             </div>
           </div>
 
-          <AICoach 
-            userProfile={userProfile}
-            onSendMessage={handleAIMessage}
-          />
+          {/* AI Coach is now mounted globally from App.jsx */}
         </>
       )}
 
@@ -212,3 +193,4 @@ const CandidateDashboard = () => {
 };
 
 export default CandidateDashboard;
+

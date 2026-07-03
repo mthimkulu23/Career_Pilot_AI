@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Briefcase, TrendingUp, Plus, ArrowRight, BookOpen } from 'lucide-react';
+import { FileText, TrendingUp, ArrowRight, BookOpen } from 'lucide-react';
+
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({
     cvCount: 2,
-    jobsTracked: 0,
     applicationsSubmitted: 4,
   });
 
+
   useEffect(() => {
-    // Dynamically retrieve jobs count from localStorage
-    const savedJobs = JSON.parse(localStorage.getItem('jobs') || '[]');
-    setStats((prev) => ({
-      ...prev,
-      jobsTracked: savedJobs.length,
-    }));
   }, []);
+
 
   const tips = [
     "Tailor your CV's keywords to match the specific job listing for better recruiter match rates.",
@@ -37,11 +33,8 @@ const Dashboard = () => {
           </h1>
           <p className="welcome-sub">Here is what is happening with your career progress today.</p>
         </div>
-        <Link to="/create-job" className="btn btn-primary create-job-btn">
-          <Plus size={18} />
-          <span>Add New Job</span>
-        </Link>
       </header>
+
 
       {/* Stats Cards Section */}
       <section className="stats-grid">
@@ -56,16 +49,6 @@ const Dashboard = () => {
         </div>
 
         <div className="stat-card glass-card">
-          <div className="stat-icon-wrapper blue">
-            <Briefcase size={24} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Active Job Listings</span>
-            <h2 className="stat-value">{stats.jobsTracked}</h2>
-          </div>
-        </div>
-
-        <div className="stat-card glass-card">
           <div className="stat-icon-wrapper green">
             <TrendingUp size={24} />
           </div>
@@ -76,19 +59,12 @@ const Dashboard = () => {
         </div>
       </section>
 
+
       {/* Main Grid Options */}
       <div className="dashboard-grid">
         <div className="grid-main glass-card">
           <h3 className="section-title">Quick Actions</h3>
           <div className="actions-list">
-            <Link to="/create-job" className="action-row">
-              <div className="action-meta">
-                <h4 className="action-title">Create a new job opportunity</h4>
-                <p className="action-description">Input a title, description, and salary details to draft a listing.</p>
-              </div>
-              <ArrowRight size={20} className="action-arrow" />
-            </Link>
-
             <Link to="/view-jobs" className="action-row">
               <div className="action-meta">
                 <h4 className="action-title">View and manage jobs list</h4>
@@ -98,6 +74,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
+
 
         <div className="grid-sidebar glass-card">
           <div className="sidebar-header">
@@ -143,11 +120,7 @@ const Dashboard = () => {
           font-size: 1rem;
         }
 
-        .create-job-btn {
-          width: auto;
-          padding-left: 1.25rem;
-          padding-right: 1.25rem;
-        }
+
 
         /* Stats grid styling */
         .stats-grid {

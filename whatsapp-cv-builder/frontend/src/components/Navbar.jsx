@@ -41,6 +41,13 @@ const Navbar = () => {
             <Briefcase size={18} />
             <span>View Jobs</span>
           </Link>
+          <Link
+            to="/profile"
+            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+          >
+            <User size={18} />
+            <span>Profile</span>
+          </Link>
         </div>
 
         {user && (
