@@ -1,0 +1,15 @@
+{
+  "venvPath": "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend",
+  "venv": ".venv",
+  "pythonVersion": "3.9",
+  "pythonPlatform": "Darwin",
+  "typeCheckingMode": "basic",
+  "extraPaths": [
+    "/Users/damacm173/Library/Python/3.9/lib/python/site-packages",
+    "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages",
+    "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend/.venv/lib/python3.9/site-packages",
+    "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend"
+  ],
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false
+}
