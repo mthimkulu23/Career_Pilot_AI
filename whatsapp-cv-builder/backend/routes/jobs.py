@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from db.connection import jobs_col
 from db.jobs import new_job, MOCK_JOBS
 from pydantic import BaseModel
 from typing import List, Optional
 from bson import ObjectId
 import datetime
+from dependencies import RoleChecker
 
 router = APIRouter(prefix="/api/jobs", tags=["Jobs"])
 
@@ -39,7 +40,10 @@ def get_jobs():
 
 
 @router.post("/")
-def create_job(job_in: JobCreate):
+def create_job(
+    job_in: JobCreate,
+    current_user: dict = Depends(RoleChecker(["EMPLOYER", "ADMIN"]))
+):
     """Create a new job posting in MongoDB Atlas."""
     if job_in.category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"Category must be one of {sorted(VALID_CATEGORIES)}")
@@ -63,7 +67,9 @@ def create_job(job_in: JobCreate):
 
 
 @router.post("/seed")
-def seed_jobs():
+def seed_jobs(
+    current_user: dict = Depends(RoleChecker(["ADMIN"]))
+):
     """
     Delete all jobs and re-insert the 8 built-in mock jobs (Tech/Trade/Service/Manual).
     Useful for resetting Atlas to a clean demo state.

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from db.connection import candidates_col, jobs_col, messages_col
 from db.candidates import new_candidate, new_message
 from services.openai_service import parse_and_classify_cv, generate_career_predictions, get_coach_response
@@ -8,6 +8,7 @@ from typing import List, Optional
 from bson import ObjectId
 import io
 import pypdf
+from dependencies import get_current_user
 
 router = APIRouter(prefix="/api/candidates", tags=["Candidates"])
 
@@ -47,12 +48,24 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse PDF: {e}")
 
+def check_access(candidate_doc: dict, current_user: dict):
+    """Enforce Candidate profile ownership or Admin/Employer permissions."""
+    if current_user.get("role") in ["ADMIN", "EMPLOYER"]:
+        return
+    # Match by profile email or explicit user_id link
+    if candidate_doc.get("email") == current_user.get("email"):
+        return
+    if candidate_doc.get("user_id") == current_user.get("id"):
+        return
+    raise HTTPException(status_code=403, detail="Access denied. You do not own this candidate profile.")
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/upload")
 async def upload_cv(
     file: Optional[UploadFile] = File(None),
     cv_text: Optional[str] = Form(None),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Stage 1–4: CV Upload → AI Document Understanding → Skill Extraction & Classification.
@@ -82,6 +95,7 @@ async def upload_cv(
         profile=profile,
         career_path=career_path,
     )
+    doc["user_id"] = current_user.get("id")
     result = candidates_col().insert_one(doc)
     candidate_id = str(result.inserted_id)
 
@@ -96,16 +110,17 @@ async def upload_cv(
 
 
 @router.get("/{candidate_id}")
-def get_candidate(candidate_id: str):
+def get_candidate(candidate_id: str, current_user: dict = Depends(get_current_user)):
     """Fetch a stored candidate profile from MongoDB Atlas."""
     doc = candidates_col().find_one({"_id": _oid(candidate_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    check_access(doc, current_user)
     return _fmt(doc)
 
 
 @router.get("/{candidate_id}/matches")
-def get_candidate_matches(candidate_id: str):
+def get_candidate_matches(candidate_id: str, current_user: dict = Depends(get_current_user)):
     """
     Stage 5: Job Matching Engine.
     Scores every job in the Atlas 'jobs' collection against the candidate.
@@ -113,6 +128,7 @@ def get_candidate_matches(candidate_id: str):
     doc = candidates_col().find_one({"_id": _oid(candidate_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    check_access(doc, current_user)
 
     profile = doc.get("profile", {})
     jobs = list(jobs_col().find())
@@ -124,20 +140,26 @@ def get_candidate_matches(candidate_id: str):
 
 
 @router.get("/{candidate_id}/career-path")
-def get_candidate_career_path(candidate_id: str):
+def get_candidate_career_path(candidate_id: str, current_user: dict = Depends(get_current_user)):
     """Stage 6–8: Return career roadmap, income opportunities, and learning plan."""
     doc = candidates_col().find_one({"_id": _oid(candidate_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    check_access(doc, current_user)
     return doc.get("career_path", {})
 
 
 @router.post("/{candidate_id}/coach/chat", response_model=ChatMessageResponse)
-def chat_with_coach(candidate_id: str, chat_in: ChatMessageIn):
+def chat_with_coach(
+    candidate_id: str,
+    chat_in: ChatMessageIn,
+    current_user: dict = Depends(get_current_user)
+):
     """Stage 9: AI Career Coach — responds to the candidate's question."""
     doc = candidates_col().find_one({"_id": _oid(candidate_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    check_access(doc, current_user)
 
     profile = doc.get("profile", {})
 
@@ -162,11 +184,12 @@ def chat_with_coach(candidate_id: str, chat_in: ChatMessageIn):
 
 
 @router.get("/{candidate_id}/coach/history", response_model=List[ChatMessageResponse])
-def get_chat_history(candidate_id: str):
+def get_chat_history(candidate_id: str, current_user: dict = Depends(get_current_user)):
     """Return full conversation history for a candidate."""
     doc = candidates_col().find_one({"_id": _oid(candidate_id)})
     if not doc:
         raise HTTPException(status_code=404, detail="Candidate not found.")
+    check_access(doc, current_user)
 
     msgs = list(messages_col().find({"candidate_id": candidate_id}).sort("created_at", 1))
     return [ChatMessageResponse(role=m["role"], content=m["content"]) for m in msgs]

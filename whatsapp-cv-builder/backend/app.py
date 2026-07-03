@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.connection import ping, jobs_col
 from db.jobs import MOCK_JOBS, new_job
-from routes import candidates, jobs, webhook
+from routes import candidates, jobs, webhook, auth
 import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +71,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(candidates.router)
 app.include_router(jobs.router)
 app.include_router(webhook.router)

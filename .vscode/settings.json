@@ -1,0 +1,15 @@
+{
+  "python.defaultInterpreterPath": "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend/.venv/bin/python3",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": [
+    "/Users/damacm173/Library/Python/3.9/lib/python/site-packages",
+    "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages",
+    "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend/.venv/lib/python3.9/site-packages",
+    "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend"
+  ],
+  "python.analysis.venvPath": "/Users/damacm173/CareerPilot AI/Career_Pilot_AI/whatsapp-cv-builder/backend",
+  "python.analysis.venv": ".venv",
+  "[python]": {
+    "editor.formatOnSave": true
+  }
+}
