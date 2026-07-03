@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Briefcase, Shield, UserCheck } from 'lucide-react';
 
 const Register = () => {
   const { register } = useAuth();
@@ -13,6 +13,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    role: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -24,6 +25,7 @@ const Register = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'First name is required';
     if (!formData.surname.trim()) newErrors.surname = 'Surname is required';
+    if (!formData.role) newErrors.role = 'Please select a role';
     
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -33,8 +35,12 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters long';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one capital letter';
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one special character';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -69,7 +75,8 @@ const Register = () => {
         formData.name,
         formData.surname,
         formData.email,
-        formData.password
+        formData.password,
+        formData.role
       );
       setIsSubmitting(false);
 
@@ -82,6 +89,7 @@ const Register = () => {
           email: '',
           password: '',
           confirmPassword: '',
+          role: '',
         });
         // Redirect to login after 2 seconds
         setTimeout(() => {
@@ -103,7 +111,7 @@ const Register = () => {
         <div className="auth-header">
           <div className="auth-logo">🚀</div>
           <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">Join CareerPilot to shape your resume & land your dream job</p>
+          <p className="auth-subtitle">Join CareerPilot and select your role to get started</p>
         </div>
 
         {serverError && (
@@ -168,6 +176,42 @@ const Register = () => {
           </div>
 
           <div className="form-group">
+            <label className="form-label">Select Your Role</label>
+            <div className="role-selection">
+              <div
+                className={`role-card ${formData.role === 'candidate' ? 'selected' : ''}`}
+                onClick={() => handleChange({ target: { name: 'role', value: 'candidate' } })}
+              >
+                <UserCheck className="role-icon" size={24} />
+                <h3 className="role-title">Candidate</h3>
+                <p className="role-description">Search for jobs and build your career</p>
+              </div>
+              <div
+                className={`role-card ${formData.role === 'employer' ? 'selected' : ''}`}
+                onClick={() => handleChange({ target: { name: 'role', value: 'employer' } })}
+              >
+                <Briefcase className="role-icon" size={24} />
+                <h3 className="role-title">Employer</h3>
+                <p className="role-description">Post jobs and find talent</p>
+              </div>
+              <div
+                className={`role-card ${formData.role === 'admin' ? 'selected' : ''}`}
+                onClick={() => handleChange({ target: { name: 'role', value: 'admin' } })}
+              >
+                <Shield className="role-icon" size={24} />
+                <h3 className="role-title">Admin</h3>
+                <p className="role-description">Oversee app insights and users</p>
+              </div>
+            </div>
+            {errors.role && (
+              <span className="form-error-msg">
+                <AlertCircle size={14} />
+                {errors.role}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
             <label className="form-label" htmlFor="email">Email Address</label>
             <div className="form-input-wrapper">
               <Mail className="input-icon" size={18} />
@@ -198,7 +242,7 @@ const Register = () => {
                 id="password"
                 name="password"
                 className={`form-input has-icon ${errors.password ? 'is-invalid' : ''}`}
-                placeholder="At least 6 characters"
+                placeholder="8+ chars, 1 capital, 1 special char"
                 value={formData.password}
                 onChange={handleChange}
               />
@@ -417,6 +461,67 @@ const Register = () => {
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
+        }
+
+        /* Role selection styles */
+        .role-selection {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+          margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+          .role-selection {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .role-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-md);
+          padding: 1rem;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          text-align: center;
+        }
+
+        .role-card:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: var(--color-primary);
+          transform: translateY(-2px);
+        }
+
+        .role-card.selected {
+          background: rgba(99, 102, 241, 0.15);
+          border-color: var(--color-primary);
+          box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .role-icon {
+          color: var(--text-muted);
+          margin-bottom: 0.5rem;
+          transition: color var(--transition-fast);
+        }
+
+        .role-card:hover .role-icon,
+        .role-card.selected .role-icon {
+          color: var(--color-primary);
+        }
+
+        .role-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 0.25rem 0;
+        }
+
+        .role-description {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          margin: 0;
+          line-height: 1.3;
         }
       `}</style>
     </div>

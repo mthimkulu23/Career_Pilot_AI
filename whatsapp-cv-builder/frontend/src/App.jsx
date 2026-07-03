@@ -8,6 +8,9 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateJob from './pages/CreateJob';
 import ViewJobs from './pages/ViewJobs';
+import CandidateDashboard from './pages/CandidateDashboard';
+import EmployerDashboard from './pages/EmployerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -53,6 +56,45 @@ function App() {
                   <Navbar />
                   <main className="main-content">
                     <ViewJobs />
+                  </main>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/candidate-dashboard"
+            element={
+              <ProtectedRoute>
+                <div className="app-container">
+                  <Navbar />
+                  <main className="main-content">
+                    <CandidateDashboard />
+                  </main>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employer-dashboard"
+            element={
+              <ProtectedRoute>
+                <div className="app-container">
+                  <Navbar />
+                  <main className="main-content">
+                    <EmployerDashboard />
+                  </main>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute>
+                <div className="app-container">
+                  <Navbar />
+                  <main className="main-content">
+                    <AdminDashboard />
                   </main>
                 </div>
               </ProtectedRoute>

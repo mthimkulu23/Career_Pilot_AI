@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, PlusCircle, Briefcase, User } from 'lucide-react';
+import { LogOut, LayoutDashboard, PlusCircle, Briefcase, User, Search } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,7 +13,7 @@ const Navbar = () => {
     <nav className="navbar-container">
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
-          <span className="logo-icon">🚀</span>
+          <Search className="logo-icon" size={24} />
           <span className="logo-text">CareerPilot<span className="logo-accent">AI</span></span>
         </Link>
 
@@ -85,6 +85,10 @@ const Navbar = () => {
           font-weight: 800;
           font-size: 1.25rem;
           color: var(--text-primary);
+        }
+
+        .logo-icon {
+          color: var(--color-primary);
         }
 
         .logo-accent {

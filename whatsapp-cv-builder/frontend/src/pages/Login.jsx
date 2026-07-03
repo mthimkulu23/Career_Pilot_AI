@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -55,7 +55,12 @@ const Login = () => {
       setIsSubmitting(false);
 
       if (result.success) {
-        navigate('/');
+        // Get user role from localStorage for immediate redirect
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const redirectPath = currentUser.role === 'candidate' ? '/candidate-dashboard' :
+                            currentUser.role === 'employer' ? '/employer-dashboard' :
+                            currentUser.role === 'admin' ? '/admin-dashboard' : '/';
+        navigate(redirectPath);
       } else {
         setServerError(result.message);
       }

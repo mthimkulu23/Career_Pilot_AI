@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
         name: foundUser.name,
         surname: foundUser.surname,
         email: foundUser.email,
+        role: foundUser.role,
       };
       localStorage.setItem('currentUser', JSON.stringify(sessionUser));
       setUser(sessionUser);
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = (name, surname, email, password) => {
+  const register = (name, surname, email, password, role) => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const emailExists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
 
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: 'Email is already registered.' };
     }
 
-    const newUser = { name, surname, email, password };
+    const newUser = { name, surname, email, password, role };
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
 
