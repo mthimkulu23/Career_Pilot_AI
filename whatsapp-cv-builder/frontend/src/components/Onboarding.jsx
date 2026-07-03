@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Upload, FileText, ArrowRight, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { buildProfileFromText, buildProfileFromUpload } from '../utils/candidateEngine';
 
 const Onboarding = ({ onComplete }) => {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [method, setMethod] = useState('');
   const [file, setFile] = useState(null);
@@ -17,27 +20,16 @@ const Onboarding = ({ onComplete }) => {
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-    // Simulate processing time
     setTimeout(() => {
+      const userName = `${user?.name || ''} ${user?.surname || ''}`.trim() || 'Candidate';
+      const profileData =
+        method === 'upload'
+          ? buildProfileFromUpload(file, userName)
+          : buildProfileFromText(rawText, userName);
+
       setIsSubmitting(false);
-      // Pass the profile data to parent
-      const profileData = {
-        name: 'User', // This would come from auth context
-        dominantSector: 'Manual Labor',
-        workStyle: 'Gig Economy',
-        skills: [
-          { name: 'Forklift Operation', level: 90 },
-          { name: 'Power Tools', level: 85 },
-          { name: 'Blueprint Reading', level: 75 },
-          { name: 'Safety Protocols', level: 95 },
-          { name: 'Team Leadership', level: 70 },
-          { name: 'Time Management', level: 80 },
-        ],
-        experience: method === 'upload' ? 'CV uploaded and processed' : rawText,
-        preferredPayment: 'Per-project basis'
-      };
       onComplete(profileData);
-    }, 2000);
+    }, 1500);
   };
 
   return (

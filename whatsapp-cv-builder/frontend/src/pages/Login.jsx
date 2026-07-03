@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getDashboardPath } from '../utils/getDashboardPath';
 import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 const Login = () => {
@@ -57,10 +58,7 @@ const Login = () => {
       if (result.success) {
         // Get user role from localStorage for immediate redirect
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        const redirectPath = currentUser.role === 'candidate' ? '/candidate-dashboard' :
-                            currentUser.role === 'employer' ? '/employer-dashboard' :
-                            currentUser.role === 'admin' ? '/admin-dashboard' : '/';
-        navigate(redirectPath);
+        navigate(getDashboardPath(currentUser.role));
       } else {
         setServerError(result.message);
       }

@@ -20,7 +20,69 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const ADMIN_SEED = {
+    name: 'Admin',
+    surname: 'User',
+    email: 'admin@example.com',
+    password: 'Admin@12345',
+    role: 'admin',
+  };
+
+  const seedAdminIfMissing = () => {
+    try {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const exists = users.some((u) => u.email?.toLowerCase() === ADMIN_SEED.email.toLowerCase());
+      if (!exists) {
+        users.push({
+          name: ADMIN_SEED.name,
+          surname: ADMIN_SEED.surname,
+          email: ADMIN_SEED.email,
+          password: ADMIN_SEED.password,
+          role: ADMIN_SEED.role,
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+    } catch {
+      // no-op
+    }
+  };
+
+  useEffect(() => {
+    seedAdminIfMissing();
+    // Check if user is already logged in from localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Failed to parse current user', e);
+        localStorage.removeItem('currentUser');
+      }
+    }
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const login = (email, password) => {
+    // Ensure admin exists in localStorage for this demo
+    seedAdminIfMissing();
+
+    // Fast path for admin credentials
+    if (
+      email.toLowerCase() === ADMIN_SEED.email.toLowerCase() &&
+      password === ADMIN_SEED.password
+    ) {
+      const sessionUser = {
+        name: ADMIN_SEED.name,
+        surname: ADMIN_SEED.surname,
+        email: ADMIN_SEED.email,
+        role: ADMIN_SEED.role,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+      setUser(sessionUser);
+      return { success: true, message: 'Logged in successfully!' };
+    }
+
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const foundUser = users.find(
       (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
@@ -36,12 +98,17 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('currentUser', JSON.stringify(sessionUser));
       setUser(sessionUser);
       return { success: true, message: 'Logged in successfully!' };
-    } else {
-      return { success: false, message: 'Invalid email or password.' };
     }
+
+    return { success: false, message: 'Invalid email or password.' };
   };
 
   const register = (name, surname, email, password, role) => {
+    // Block creation of admin accounts from the register page
+    if (role === 'admin') {
+      return { success: false, message: 'Admin accounts are pre-created. Please contact support.' };
+    }
+
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const emailExists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
 

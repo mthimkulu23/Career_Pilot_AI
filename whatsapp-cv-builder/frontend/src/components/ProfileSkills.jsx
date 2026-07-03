@@ -55,6 +55,11 @@ const ProfileSkills = ({ profile, onUpdateProfile }) => {
         <div className="profile-info">
           <h2 className="profile-name">{displayProfile.name}</h2>
           <p className="profile-experience">{displayProfile.experience}</p>
+          {displayProfile.lastUpdated && (
+            <p className="profile-updated">
+              Last updated: {new Date(displayProfile.lastUpdated).toLocaleDateString()}
+            </p>
+          )}
         </div>
         <button 
           className="update-profile-btn"
@@ -162,6 +167,12 @@ const ProfileSkills = ({ profile, onUpdateProfile }) => {
           color: var(--text-secondary);
           font-size: 0.9rem;
           margin: 0;
+        }
+
+        .profile-updated {
+          color: var(--text-muted);
+          font-size: 0.75rem;
+          margin: 0.25rem 0 0;
         }
 
         .profile-highlights {

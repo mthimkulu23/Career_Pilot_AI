@@ -8,13 +8,18 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import EmployerChatWidget from './components/EmployerChatWidget';
-
 import CreateJob from './pages/CreateJob';
 import ViewJobs from './pages/ViewJobs';
 import CandidateDashboard from './pages/CandidateDashboard';
 import EmployerDashboard from './pages/EmployerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AICoach from './components/AICoach';
+import { getDashboardPath } from './utils/getDashboardPath';
+
+const RoleBasedRedirect = () => {
+  const { user } = useAuth();
+  return <Navigate to={getDashboardPath(user?.role)} replace />;
+};
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -33,7 +38,6 @@ const AppContent = () => {
   }, [emailKey]);
 
   const handleAIMessage = async () => {
-    // Placeholder response for now.
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(
@@ -45,32 +49,29 @@ const AppContent = () => {
 
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected routes */}
       <Route
         path="/"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['candidate']}>
             <div className="app-container">
               <Navbar />
               <main className="main-content">
-                    <Dashboard />
-                  </main>
-                  <AICoach userProfile={userProfile} onSendMessage={handleAIMessage} />
-                  <EmployerChatWidget candidateEmail={user?.email} employerId="default-employer" />
-
-                </div>
-              </ProtectedRoute>
+                <Dashboard />
+              </main>
+              <AICoach userProfile={userProfile} onSendMessage={handleAIMessage} />
+              <EmployerChatWidget candidateEmail={user?.email} employerId="default-employer" />
+            </div>
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/create-job"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="employer">
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -85,7 +86,7 @@ const AppContent = () => {
       <Route
         path="/view-jobs"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['candidate', 'employer']}>
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -100,7 +101,7 @@ const AppContent = () => {
       <Route
         path="/candidate-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="candidate">
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -115,7 +116,7 @@ const AppContent = () => {
       <Route
         path="/employer-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="employer">
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -130,13 +131,12 @@ const AppContent = () => {
       <Route
         path="/admin-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <div className="app-container">
               <Navbar />
               <main className="main-content">
                 <AdminDashboard />
               </main>
-              <AICoach userProfile={userProfile} onSendMessage={handleAIMessage} />
             </div>
           </ProtectedRoute>
         }
@@ -145,7 +145,7 @@ const AppContent = () => {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['candidate', 'employer']}>
             <div className="app-container">
               <Navbar />
               <main className="main-content">
@@ -157,8 +157,10 @@ const AppContent = () => {
         }
       />
 
-      {/* Fallback route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="*"
+        element={user ? <RoleBasedRedirect /> : <Navigate to="/login" replace />}
+      />
     </Routes>
   );
 };
@@ -167,123 +169,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <Dashboard />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/create-job"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <CreateJob />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/view-jobs"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <ViewJobs />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/candidate-dashboard"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <CandidateDashboard />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/employer-dashboard"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <EmployerDashboard />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <AdminDashboard />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <div className="app-container">
-                  <Navbar />
-                  <main className="main-content">
-                    <Profile />
-                  </main>
-                  <AICoach userProfile={null} onSendMessage={async () => 'AI Coach is not configured yet.'} />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-
-
-        </Routes>
+        <AppContent />
       </AuthProvider>
     </Router>
   );

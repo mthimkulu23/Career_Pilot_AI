@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getDashboardPath } from '../utils/getDashboardPath';
 import { LogOut, LayoutDashboard, PlusCircle, Briefcase, User, Search } from 'lucide-react';
 
 const Navbar = () => {
@@ -8,46 +9,59 @@ const Navbar = () => {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+  const homePath = getDashboardPath(user?.role);
 
   return (
     <nav className="navbar-container">
       <div className="navbar-inner">
-        <Link to="/" className="navbar-logo">
+        <Link to={homePath} className="navbar-logo">
           <Search className="logo-icon" size={24} />
           <span className="logo-text">CareerPilot<span className="logo-accent">AI</span></span>
         </Link>
 
         <div className="navbar-links">
-          <Link
-            to="/"
-            className={`nav-link ${isActive('/') ? 'active' : ''}`}
-          >
-            <LayoutDashboard size={18} />
-            <span>Dashboard</span>
-          </Link>
-          {user?.role === 'employer' && (
+          {user?.role === 'admin' ? (
             <Link
-              to="/create-job"
-              className={`nav-link ${isActive('/create-job') ? 'active' : ''}`}
+              to="/admin-dashboard"
+              className={`nav-link ${isActive('/admin-dashboard') ? 'active' : ''}`}
             >
-              <PlusCircle size={18} />
-              <span>Create Job</span>
+              <LayoutDashboard size={18} />
+              <span>Admin Dashboard</span>
             </Link>
+          ) : (
+            <>
+              <Link
+                to={homePath}
+                className={`nav-link ${isActive(homePath) ? 'active' : ''}`}
+              >
+                <LayoutDashboard size={18} />
+                <span>Dashboard</span>
+              </Link>
+              {user?.role === 'employer' && (
+                <Link
+                  to="/create-job"
+                  className={`nav-link ${isActive('/create-job') ? 'active' : ''}`}
+                >
+                  <PlusCircle size={18} />
+                  <span>Create Job</span>
+                </Link>
+              )}
+              <Link
+                to="/view-jobs"
+                className={`nav-link ${isActive('/view-jobs') ? 'active' : ''}`}
+              >
+                <Briefcase size={18} />
+                <span>View Jobs</span>
+              </Link>
+              <Link
+                to="/profile"
+                className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+              >
+                <User size={18} />
+                <span>Profile</span>
+              </Link>
+            </>
           )}
-          <Link
-            to="/view-jobs"
-            className={`nav-link ${isActive('/view-jobs') ? 'active' : ''}`}
-          >
-            <Briefcase size={18} />
-            <span>View Jobs</span>
-          </Link>
-          <Link
-            to="/profile"
-            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-          >
-            <User size={18} />
-            <span>Profile</span>
-          </Link>
         </div>
 
         {user && (

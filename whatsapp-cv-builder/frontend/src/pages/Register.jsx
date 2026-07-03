@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Briefcase, Shield, UserCheck } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Briefcase, UserCheck } from 'lucide-react';
 
 const Register = () => {
   const { register } = useAuth();
@@ -194,14 +194,7 @@ const Register = () => {
                 <h3 className="role-title">Employer</h3>
                 <p className="role-description">Post jobs and find talent</p>
               </div>
-              <div
-                className={`role-card ${formData.role === 'admin' ? 'selected' : ''}`}
-                onClick={() => handleChange({ target: { name: 'role', value: 'admin' } })}
-              >
-                <Shield className="role-icon" size={24} />
-                <h3 className="role-title">Admin</h3>
-                <p className="role-description">Oversee app insights and users</p>
-              </div>
+
             </div>
             {errors.role && (
               <span className="form-error-msg">
