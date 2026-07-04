@@ -48,7 +48,7 @@ def webhook_whatsapp_cv(req: WhatsAppCVRequest):
     )
 
     if existing:
-        doc["updated_at"] = datetime.datetime.utcnow()
+        doc["updated_at"] = datetime.datetime.now(datetime.timezone.utc)
         col.update_one({"phone": phone}, {"$set": doc})
         candidate_id = str(existing["_id"])
     else:

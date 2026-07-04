@@ -34,6 +34,9 @@ def messages_col() -> Collection[Any]:
 def users_col() -> Collection[Any]:
     return get_db()["users"]
 
+def employer_actions_col() -> Collection[Any]:
+    return get_db()["employer_actions"]
+
 def ping():
     """Verify connectivity to Atlas on startup."""
     get_client().admin.command("ping")

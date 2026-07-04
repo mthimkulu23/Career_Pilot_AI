@@ -29,5 +29,5 @@ def new_user(email: str, hashed_password: str, role: str) -> dict:
         "email": email.lower().strip(),
         "hashed_password": hashed_password,
         "role": normalized_role,
-        "created_at": datetime.datetime.utcnow(),
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
     }

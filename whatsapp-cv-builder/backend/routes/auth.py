@@ -1,8 +1,11 @@
 """
 Authentication routes for user registration and JWT retrieval.
 """
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException, status, Depends
+# pyrefly: ignore [missing-import]
 from fastapi.security import OAuth2PasswordRequestForm
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, EmailStr, Field
 from db.connection import users_col
 from db.users import new_user, UserRole
@@ -11,10 +14,9 @@ from services.auth_service import get_password_hash, verify_password, create_acc
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 class RegisterPayload(BaseModel):
-    email: str = Field(..., description="Unique email address for registration")
-    password: str = Field(..., min_length=6, description="Password must be at least 6 characters")
+    email: str = Field(description="Unique email address for registration")
+    password: str = Field(min_length=6, description="Password must be at least 6 characters")
     role: UserRole = Field(default=UserRole.CANDIDATE, description="Role: CANDIDATE, EMPLOYER, or ADMIN")
-
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str

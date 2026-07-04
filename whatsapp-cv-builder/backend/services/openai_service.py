@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+from typing import Any
 import httpx
 from config import OPENAI_API_KEY, GEMINI_API_KEY
 
@@ -22,7 +23,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = False) -> s
                 "Authorization": f"Bearer {OPENAI_API_KEY}",
                 "Content-Type": "application/json"
             }
-            payload = {
+            payload: dict[str, Any] = {
                 "model": "gpt-4o-mini",
                 "messages": [
                     {"role": "system", "content": system_prompt},
@@ -57,7 +58,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = False) -> s
             # Combine prompts for Gemini
             combined_prompt = f"{system_prompt}\n\nUser Input:\n{user_prompt}"
             
-            payload = {
+            payload: dict[str, Any] = {
                 "contents": [{
                     "parts": [{"text": combined_prompt}]
                 }],
@@ -86,11 +87,14 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = False) -> s
 def parse_and_classify_cv(cv_text: str) -> dict:
     """
     Step 2 & 3 & 4: AI Document Understanding, Skill Extraction, and Skill Classification.
-    Parses resume text and groups skills into Tech / Trade / Service / Manual.
+    Parses resume text (supporting any language) and translates the profile elements (summary, skills, roles) 
+    to English for standardized ML matching, while extracting standard entities.
     """
     system_prompt = (
         "You are an expert HR AI system. Analyze the following CV/resume text.\n"
+        "The CV may be in any language (e.g., Spanish, French, Zulu, Xhosa, etc.). Detect the input language.\n"
         "Extract the candidate's name, email, phone number, a brief summary, and their work experience and education list.\n"
+        "IMPORTANT: To ensure correct database indexing and matching, translate the 'summary', 'skills', and experience 'role'/'description' values to English in the JSON output.\n"
         "Additionally, extract all professional skills and classify EACH skill into exactly one of these four categories:\n"
         "1. Tech: Programming languages, frameworks, IT support, cloud services, software, data analysis, digital design, tech engineering.\n"
         "2. Trade: Plumbing, welding, carpentry, electrical, auto mechanics, masonry, heavy equipment operations, construction trades.\n"
@@ -106,7 +110,7 @@ def parse_and_classify_cv(cv_text: str) -> dict:
         "  \"name\": \"Full Name\",\n"
         "  \"email\": \"email@example.com\",\n"
         "  \"phone\": \"phone or empty\",\n"
-        "  \"summary\": \"Brief profile summary\",\n"
+        "  \"summary\": \"Brief profile summary in English\",\n"
         "  \"skills\": [\"Skill1\", \"Skill2\", ...],\n"
         "  \"skill_classification\": {\n"
         "    \"Tech\": [\"Skill1\", ...],\n"
@@ -118,9 +122,9 @@ def parse_and_classify_cv(cv_text: str) -> dict:
         "  \"experience\": [\n"
         "    {\n"
         "      \"company\": \"Company Name\",\n"
-        "      \"role\": \"Job Title\",\n"
+        "      \"role\": \"Job Title in English\",\n"
         "      \"duration\": \"Start - End\",\n"
-        "      \"description\": \"Key responsibilities\"\n"
+        "      \"description\": \"Key responsibilities in English\"\n"
         "    }\n"
         "  ],\n"
         "  \"education\": [\n"
@@ -150,6 +154,8 @@ def generate_career_predictions(profile: dict) -> dict:
     """
     Step 6 & 7 & 8: Career Path Predictor, Income Opportunity Engine, and Learning Recommendations.
     Generates milestones, salary potentials, freelance options, and learning topics.
+    IMPORTANT: Responses will be in the detected language of the input/candidate context if indicated, 
+    otherwise English by default.
     """
     system_prompt = (
         "You are a senior career path analyst and income strategy AI. Based on the candidate's profile (skills and employment_preference), "
@@ -199,11 +205,13 @@ def get_coach_response(profile: dict, chat_history: list, user_message: str) -> 
     """
     Step 9: AI Career Coach Chat Assistant.
     Generates helpful, personalized advice based on candidate context.
+    IMPORTANT: Detect the language of the user's message and respond in the EXACT same language (e.g. Spanish, French, Zulu, etc.).
     """
     system_prompt = (
         "You are CareerPilot Coach, an encouraging, professional, and practical AI Career Coach.\n"
         "You are chatting with a candidate. Give them actionable, custom guidance. Recommend concrete steps.\n"
         f"Candidate Career Profile: {json.dumps(profile)}\n\n"
+        "IMPORTANT: Detect the language of the user's input. You MUST write your entire response in that same language.\n"
         "Keep your response concise (1-2 paragraphs max), friendly, and structured. Focus on helping them grow."
     )
 

@@ -49,6 +49,150 @@ When building the web/mobile app, the user should be guided through these 4 dist
 
 ---
 
+## 🏢 Stage 5: Employer Portal & Talent Engagement
+
+### Goal
+Help employers quickly discover qualified candidates, communicate with them, and manage recruitment efficiently — creating a complete two-sided marketplace.
+
+---
+
+### 5.1 Employer Dashboard
+After logging in, the employer should see a summary panel with key recruitment metrics at a glance:
+
+| Widget | Description |
+|--------|-------------|
+| **Active Job Posts** | All live vacancies and their status |
+| **Number of Applicants** | Candidates who applied or were matched |
+| **AI Recommended Candidates** | Top-ranked matches across all vacancies |
+| **Interviews Scheduled** | Upcoming and pending interview sessions |
+| **Hiring Analytics** | Conversion rates, time-to-hire, skill trends |
+
+---
+
+### 5.2 AI Candidate Matching
+Instead of searching manually, employers receive AI-powered candidate recommendations automatically based on their posted jobs.
+
+**Example recommendations:**
+
+> **Software Engineer** — Match Score: 96%
+> Skills: Python, FastAPI, MongoDB, AWS | Experience: 4 years | Available Immediately
+
+> **Electrician** — Match Score: 92%
+> Certified | 6 years experience | Available Full Time
+
+---
+
+### 5.3 Candidate Search & Filtering
+Allow employers to filter the candidate pool by:
+- Skills
+- Industry sector (Tech / Trade / Service / Manual / Gig)
+- Experience level
+- Location
+- Availability
+- Expected salary
+- Employment type (Formal / Informal / Gig)
+- Certifications
+
+---
+
+### 5.4 Candidate Profile View (Employer-facing)
+Each candidate profile visible to an employer should include:
+- AI-generated professional summary
+- Skills (classified by sector)
+- Work history
+- Education
+- Certifications
+- Portfolio link (if applicable)
+- Match percentage against the employer's job posting
+- Career interests and availability status
+
+> [!CAUTION]
+> **Employers must NOT be able to access:**
+> - AI coaching conversations
+> - Personal career plans or predictions
+> - Private candidate notes
+
+---
+
+### 5.5 Employer Actions
+Employers should be able to perform the following actions on any candidate profile:
+
+- ⭐ **Save** candidate for later
+- 📋 **Shortlist** candidate for a specific vacancy
+- 📅 **Send interview invitation**
+- 💬 **Send direct message**
+- 📄 **Download CV** (if candidate has granted permission)
+- ❌ **Reject or Archive** candidate
+- ✅ **Offer Employment**
+
+---
+
+### 5.6 Employer Engagement Strategy
+To keep employers returning to the platform regularly, the system should notify them proactively.
+
+**Weekly Talent Recommendations:**
+> *"3 new candidates matching your Warehouse Manager role are now available."*
+
+**Instant Match Notifications (Real-time):**
+Whenever a new candidate uploads a CV that matches an existing job posting:
+> *"3 new candidates match your Software Developer vacancy."*
+
+**AI Recruitment Assistant (Chat):**
+Employers can ask an AI assistant questions such as:
+- *"Who are my best candidates?"*
+- *"Why is this candidate a good match?"*
+- *"Which applicants meet all mandatory requirements?"*
+- *"Who can start immediately?"*
+- *"What skills are missing in my applicant pool?"*
+
+---
+
+### 5.7 Hiring Analytics Dashboard
+Display the following metrics to help employers optimize their process:
+
+| Metric | Description |
+|--------|-------------|
+| Active vacancies | Total open positions |
+| Average time to hire | Days from posting to offer acceptance |
+| Interview conversion rate | Percentage of interviews leading to offers |
+| Offer acceptance rate | Percentage of offers accepted by candidates |
+| Most requested skills | Top skills searched across all employer accounts |
+| Candidate response rate | Percentage of candidates who respond to outreach |
+
+---
+
+### 5.8 Recruitment Workflow
+```
+1. Employer creates an account (EMPLOYER role)
+2. Employer posts a job via POST /api/jobs/
+3. AI analyzes the job description and indexes it
+4. AI automatically ranks the best matching candidates
+5. Employer reviews recommended candidates
+6. Employer contacts and shortlists candidates
+7. Interviews are scheduled
+8. Candidate accepts or declines the offer
+9. Employer marks the position as Filled
+10. AI learns from the hiring outcome to improve future recommendations
+```
+
+---
+
+### 5.9 Future AI Features (Roadmap)
+To make CareerPilot AI stand out from competitors, the following AI-powered features are planned:
+
+| Feature | Description |
+|---------|-------------|
+| **Resume-to-Job Matching** | Automatically match uploaded CVs to active vacancies |
+| **AI Candidate Ranking** | Explain *why* each candidate is a strong fit |
+| **Interview Question Generator** | Create role-specific interview questions automatically |
+| **Candidate Skill Gap Analysis** | Identify missing skills and recommend training paths |
+| **Salary Benchmarking** | Suggest competitive salary ranges by role and location |
+| **Talent Pipeline** | Maintain a pool of promising candidates for future openings |
+| **Automated Follow-ups** | Remind employers to review applications or respond to candidates |
+
+---
+
+
 ## 🔒 User Roles & Security Model
 
 To protect user data and ensure proper permissions, the frontend must support three distinct user roles:

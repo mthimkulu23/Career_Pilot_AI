@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.connection import ping, jobs_col
 from db.jobs import MOCK_JOBS, new_job
-from routes import candidates, jobs, webhook, auth
+from routes import candidates, jobs, webhook, auth, ai, employer
 import datetime
 
 logging.basicConfig(level=logging.INFO)
@@ -74,7 +74,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(candidates.router)
 app.include_router(jobs.router)
-app.include_router(webhook.router)
+app.include_router(ai.router)
+app.include_router(employer.router)
 
 
 @app.get("/api/status", tags=["Health"])

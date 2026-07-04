@@ -34,7 +34,7 @@ def new_candidate(name, email, phone, raw_text, profile, career_path) -> dict:
         "raw_text": raw_text,
         "profile": profile,
         "career_path": career_path,
-        "created_at": datetime.datetime.utcnow(),
+        "created_at": datetime.datetime.now(datetime.timezone.utc),
     }
 
 
@@ -43,5 +43,5 @@ def new_message(candidate_id: str, role: str, content: str) -> dict:
         "candidate_id": candidate_id,
         "role": role,
         "content": content,
-        "created_at": datetime.datetime.utcnow(),
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
     }
