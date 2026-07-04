@@ -1,6 +1,8 @@
+import { getPlatformJobs } from './placeholderJobs';
+
 export function loadPlatformData() {
   const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const jobs = JSON.parse(localStorage.getItem('jobs') || '[]');
+  const jobs = getPlatformJobs();
 
   const candidates = users.filter((u) => u.role === 'candidate');
   const employers = users.filter((u) => u.role === 'employer');

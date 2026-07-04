@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, MapPin, Calendar, DollarSign, Briefcase } from 'lucide-react';
+import { Plus, Trash2, MapPin, Calendar, Banknote, Briefcase } from 'lucide-react';
+import { getPlatformJobs } from '../utils/placeholderJobs';
 
 const ViewJobs = () => {
   const navigate = useNavigate();
@@ -9,38 +10,7 @@ const ViewJobs = () => {
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    // Read jobs from localStorage, prepopulate if empty
-    const savedJobs = localStorage.getItem('jobs');
-    if (savedJobs) {
-      setJobs(JSON.parse(savedJobs));
-    } else {
-      const defaultJobs = [
-        {
-          id: 1,
-          title: 'Senior Frontend Engineer',
-          company: 'Stripe',
-          location: 'San Francisco, CA (Hybrid)',
-          type: 'Full-time',
-          salary: '$165,000 - $190,000',
-          description: 'Looking for a product-minded engineer to lead frontend architecture for payments UI.',
-          status: 'Active',
-          createdAt: '2026-07-01',
-        },
-        {
-          id: 2,
-          title: 'Lead UX Designer',
-          company: 'Linear',
-          location: 'Remote (US/Europe)',
-          type: 'Remote',
-          salary: '$140,000 - $160,000',
-          description: 'Shape the next generation of software tracking tools. Requires 5+ years of design systems experience.',
-          status: 'Active',
-          createdAt: '2026-07-02',
-        },
-      ];
-      localStorage.setItem('jobs', JSON.stringify(defaultJobs));
-      setJobs(defaultJobs);
-    }
+    setJobs(getPlatformJobs());
   }, []);
 
   const handleDelete = (id) => {
@@ -118,7 +88,7 @@ const ViewJobs = () => {
                     <span>{job.location}</span>
                   </div>
                   <div className="meta-item">
-                    <DollarSign size={16} />
+                    <Banknote size={16} />
                     <span>{job.salary}</span>
                   </div>
                   <div className="meta-item">

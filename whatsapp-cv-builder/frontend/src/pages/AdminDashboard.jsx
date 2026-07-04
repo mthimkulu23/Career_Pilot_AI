@@ -128,6 +128,7 @@ const AdminDashboard = () => {
                       <th>Company</th>
                       <th>Location</th>
                       <th>Type</th>
+                      <th>Salary</th>
                       <th>Status</th>
                       <th>Posted</th>
                       <th></th>
@@ -140,6 +141,7 @@ const AdminDashboard = () => {
                         <td>{job.company}</td>
                         <td>{job.location}</td>
                         <td>{job.type}</td>
+                        <td>{job.salary || '—'}</td>
                         <td><span className="status-badge">{job.status || 'Active'}</span></td>
                         <td>{job.createdAt || '—'}</td>
                         <td>

@@ -123,7 +123,7 @@ const CreateJob = () => {
                 id="company"
                 name="company"
                 className={`form-input ${errors.company ? 'is-invalid' : ''}`}
-                placeholder="Google"
+                placeholder="e.g. Vodacom, Discovery Ltd"
                 value={formData.company}
                 onChange={handleChange}
               />
@@ -144,7 +144,7 @@ const CreateJob = () => {
                 id="location"
                 name="location"
                 className={`form-input ${errors.location ? 'is-invalid' : ''}`}
-                placeholder="Remote / San Francisco, CA"
+                placeholder="Sandton, Johannesburg / Remote (SA)"
                 value={formData.location}
                 onChange={handleChange}
               />
@@ -180,7 +180,7 @@ const CreateJob = () => {
                 id="salary"
                 name="salary"
                 className={`form-input ${errors.salary ? 'is-invalid' : ''}`}
-                placeholder="e.g. $120,000 - $140,000"
+                placeholder="e.g. R450,000 - R650,000 p.a."
                 value={formData.salary}
                 onChange={handleChange}
               />

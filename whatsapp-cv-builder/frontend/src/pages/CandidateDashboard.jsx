@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Onboarding from '../components/Onboarding';
 import ProfileSkills from '../components/ProfileSkills';
 import JobMatcher from '../components/JobMatcher';
+import AICoach from '../components/AICoach';
 import {
   generateAllMatches,
   saveCandidateData,
@@ -31,12 +32,20 @@ const CandidateDashboard = () => {
   };
 
   const applyMatches = useCallback((profile) => {
-    const matches = generateAllMatches(profile);
-    setMatchedJobs(matches.matchedJobs);
-    setSideHustles(matches.sideHustles);
-    setCareerPath(matches.careerPath);
-    saveCandidateData(user?.email, { profile, ...matches });
-    return matches;
+    console.log('Applying matches for profile:', profile);
+    try {
+      const matches = generateAllMatches(profile);
+      console.log('Generated matches:', matches);
+      setMatchedJobs(matches.matchedJobs || []);
+      setSideHustles(matches.sideHustles || []);
+      setCareerPath(matches.careerPath || []);
+      saveCandidateData(user?.email, { profile, ...matches });
+      return matches;
+    } catch (error) {
+      console.error('Error generating matches:', error);
+      // Return empty arrays on error to prevent blank screen
+      return { matchedJobs: [], sideHustles: [], careerPath: [] };
+    }
   }, [user?.email]);
 
   const loadUserData = useCallback(async () => {
@@ -79,12 +88,26 @@ const CandidateDashboard = () => {
   }, [user, loadUserData]);
 
   const handleOnboardingComplete = (profileData) => {
+    console.log('Onboarding complete with profile:', profileData);
     localStorage.setItem(`onboarding_${user?.email}`, 'completed');
-    const matches = applyMatches(profileData);
-    setUserProfile(profileData);
+    
+    // Ensure profile has required fields
+    const validProfile = {
+      ...profileData,
+      skills: profileData.skills || [],
+      dominantSector: profileData.dominantSector || 'General Professional',
+      workStyle: profileData.workStyle || 'Full-time Employment',
+      preferredPayment: profileData.preferredPayment || 'Competitive salary (ZAR)',
+    };
+    
+    const matches = applyMatches(validProfile);
+    console.log('Generated matches:', matches);
+    setUserProfile(validProfile);
     setHasCompletedOnboarding(true);
     setShowOnboarding(false);
-    showToast(`Profile created! Found ${matches.matchedJobs.length} job matches.`);
+    
+    const jobCount = matches.matchedJobs?.length || 0;
+    showToast(`Profile created! Found ${jobCount} job matches.`);
   };
 
   const handleProfileUpdate = async (updatedData) => {
@@ -207,6 +230,17 @@ const CandidateDashboard = () => {
               />
             </div>
           </div>
+
+          <AICoach 
+            userProfile={userProfile}
+            onSendMessage={async (message) => {
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve("I'm here to help with your career questions. Connect me to an AI backend for personalized responses based on your profile.");
+                }, 1000);
+              });
+            }}
+          />
         </>
       )}
 
