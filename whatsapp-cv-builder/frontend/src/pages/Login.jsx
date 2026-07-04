@@ -128,6 +128,9 @@ const Login = () => {
                 {errors.password}
               </span>
             )}
+            <div className="forgot-password-link">
+              <Link to="/forgot-password">Forgot Password?</Link>
+            </div>
           </div>
 
           <button
@@ -282,6 +285,24 @@ const Login = () => {
 
         .auth-link:hover {
           color: var(--color-primary-hover);
+        }
+
+        .forgot-password-link {
+          text-align: right;
+          margin-top: 0.5rem;
+        }
+
+        .forgot-password-link a {
+          color: var(--color-primary);
+          text-decoration: none;
+          font-size: 0.85rem;
+          font-weight: 500;
+          transition: color var(--transition-fast);
+        }
+
+        .forgot-password-link a:hover {
+          color: var(--color-primary-hover);
+          text-decoration: underline;
         }
 
         /* Spinner for submissions */
