@@ -12,6 +12,7 @@ from routes.webhook import webhook_bp
 from routes.jobs import jobs_bp
 from routes.auth import auth_bp
 from routes.candidates import candidates_bp
+from routes.employer import employer_bp
 
 # The path to the React build folder
 frontend_dist = os.path.join(basedir, "..", "frontend", "dist")
@@ -27,6 +28,7 @@ app.register_blueprint(webhook_bp, url_prefix="/api")
 app.register_blueprint(jobs_bp, url_prefix="/api")
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(candidates_bp, url_prefix="/api")
+app.register_blueprint(employer_bp, url_prefix="/api")
 
 # Serve the React App from the root path
 @app.route("/")

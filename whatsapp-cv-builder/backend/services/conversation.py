@@ -1,80 +1,89 @@
-from db.candidates import get_candidate_by_phone, create_candidate, update_candidate
-from services.whatsapp_service import send_whatsapp_message
-from services.openai_service import generate_cv_summary
+# ---------------------------------------------------------------
+# backend/services/conversation.py
+# WHY THIS FILE EXISTS:
+#   The "brain" of the WhatsApp bot. Runs the five-question flow:
+#   given an incoming message, it figures out which question the
+#   candidate is answering, saves it, and returns the next question.
+#
+# HOW IT CONNECTS:
+#   - Uses db/candidates.py to read/write candidate records
+#   - Uses the "step" field to track progress
+#   - Calls services/openai_service.py after Q5 for the summary
+#   - routes/webhook.py calls handle_message() for every message
+# ---------------------------------------------------------------
 
-def handle_incoming_message(phone_number, text_content):
-    """Processes incoming candidate messages and progresses their state through the CV building flow."""
-    # Fetch or initialize candidate
-    candidate = get_candidate_by_phone(phone_number)
-    if not candidate:
-        candidate = create_candidate(phone_number)
-    
-    current_state = candidate.get("state", "START")
-    text = text_content.strip()
-    
-    if current_state == "START":
-        welcome_msg = "Welcome to Career Pilot AI! Let's build your professional CV in 4 quick steps.\n\nFirst, please reply with your **Full Name**."
-        send_whatsapp_message(phone_number, welcome_msg)
-        update_candidate(phone_number, {"state": "AWAITING_NAME"})
-        
-    elif current_state == "AWAITING_NAME":
-        update_candidate(phone_number, {
-            "name": text,
-            "state": "AWAITING_EXPERIENCE"
-        })
-        send_whatsapp_message(
-            phone_number, 
-            "Great! Next, please describe your **Work Experience** (e.g. '2 years as a cashier', 'freelance software engineer for 1 year')."
+from db.candidates import (
+    get_candidate,
+    create_candidate,
+    save_answer,
+    save_summary,
+)
+from services.openai_service import generate_summary
+
+# The five questions in order. Each step maps to the field to save
+# and the text to send.
+QUESTIONS = {
+    1: {"field": "full_name",        "text": "Question 1 of 5:\nWhat is your full name?"},
+    2: {"field": "phone_number",     "text": "Question 2 of 5:\nWhat is your phone number?"},
+    3: {"field": "qualification",    "text": "Question 3 of 5:\nWhat is your highest qualification?"},
+    4: {"field": "main_skill",       "text": "Question 4 of 5:\nWhat is your main skill? (e.g. Plumbing, React, Sales)"},
+    5: {"field": "years_experience", "text": "Question 5 of 5:\nHow many years of experience do you have?"},
+}
+
+
+def handle_message(whatsapp_number, message_text):
+    """
+    Handle one incoming WhatsApp message and return the text to reply.
+    """
+    candidate = get_candidate(whatsapp_number)
+
+    # New person: create record, ask Q1.
+    if candidate is None:
+        create_candidate(whatsapp_number)
+        return (
+            "Welcome to the CV Builder!\n"
+            "I'll ask you 5 quick questions to build your CV.\n\n"
+            + QUESTIONS[1]["text"]
         )
+
+    current_step = candidate["step"]
+
+    # Already finished with CV setup. Handle career coaching.
+    if current_step >= 6:
+        from services.openai_service import generate_coach_response
+        from db.connection import get_db
         
-    elif current_state == "AWAITING_EXPERIENCE":
-        update_candidate(phone_number, {
-            "experience": text,
-            "state": "AWAITING_SKILLS"
-        })
-        send_whatsapp_message(
-            phone_number, 
-            "Got it. Now, please list your **Key Skills** separated by commas (e.g. 'Python, SQL, communication' or 'Customer Service, POS, stock management')."
-        )
+        db = get_db()
+        candidate_profile = db["candidate_profiles"].find_one({"whatsapp_number": whatsapp_number}, {"_id": 0})
         
-    elif current_state == "AWAITING_SKILLS":
-        # Parse skills
-        skills = [s.strip() for s in text.split(",") if s.strip()]
-        
-        # Update state during generation
-        update_candidate(phone_number, {"skills": skills, "state": "GENERATING_SUMMARY"})
-        send_whatsapp_message(phone_number, "Thank you! Generating your professional CV summary now...")
-        
-        # Generate summary using OpenAI
-        name = candidate.get("name", "Candidate")
-        experience = candidate.get("experience", "Not specified")
-        summary = generate_cv_summary(name, experience, skills)
-        
-        # Save final state
-        update_candidate(phone_number, {
-            "skills": skills,
-            "summary": summary,
-            "state": "COMPLETED"
-        })
-        
-        summary_msg = f"🎉 **CV Successfully Built!**\n\nHere is your generated Professional Summary:\n\n\"{summary}\"\n\nWe will notify you immediately via WhatsApp if any matching jobs are published."
-        send_whatsapp_message(phone_number, summary_msg)
-        
-    elif current_state == "COMPLETED":
-        if text.lower() == "reset":
-            welcome_msg = "Let's rebuild your CV. Please reply with your **Full Name**."
-            send_whatsapp_message(phone_number, welcome_msg)
-            update_candidate(phone_number, {
-                "name": "",
-                "experience": "",
-                "skills": [],
-                "summary": "",
-                "state": "AWAITING_NAME"
-            })
+        # Determine the prompt based on shortcuts
+        text_lower = message_text.strip().lower()
+        if text_lower == "tips":
+            prompt = "Please give me some personalized career coaching tips based on my profile."
+        elif text_lower == "questions":
+            prompt = "Please give me some common interview questions and how I should answer them based on my profile."
         else:
-            info_msg = "Your CV is already registered. If you wish to rebuild it, please reply with 'reset'."
-            send_whatsapp_message(phone_number, info_msg)
+            prompt = message_text
             
-    # For any transition or error recovery
-    elif current_state == "GENERATING_SUMMARY":
-        send_whatsapp_message(phone_number, "We are currently generating your summary. Please wait a moment.")
+        reply = generate_coach_response(prompt, candidate_profile or candidate)
+        return reply
+
+    # Save the answer to the current question, advance the step.
+    field = QUESTIONS[current_step]["field"]
+    save_answer(whatsapp_number, field, message_text, current_step + 1)
+
+    # Not the last question: ask the next one.
+    if current_step < 5:
+        return QUESTIONS[current_step + 1]["text"]
+
+    # That was Q5: generate summary, save it, finish.
+    candidate = get_candidate(whatsapp_number)
+    summary = generate_summary(candidate)
+    save_summary(whatsapp_number, summary)
+
+    return (
+        "Thank you! Your CV is complete.\n\n"
+        "Here is your professional summary:\n\n"
+        + summary
+        + "\n\nYou'll get a WhatsApp alert when a matching job is posted."
+    )

@@ -6,3 +6,5 @@ python-dotenv
 openai
 requests
 mailtrap
+PyPDF2
+twilio

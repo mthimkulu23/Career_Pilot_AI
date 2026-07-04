@@ -117,7 +117,11 @@ def reset_password_with_token(token, new_password):
         raise ValueError("Invalid or expired reset token.")
     
     # Check expiration
-    if datetime.now(timezone.utc) > token_doc["expires_at"]:
+    expires_at = token_doc["expires_at"]
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+    if datetime.now(timezone.utc) > expires_at:
         tokens_col.delete_one({"_id": token_doc["_id"]})
         raise ValueError("This reset token has expired.")
     

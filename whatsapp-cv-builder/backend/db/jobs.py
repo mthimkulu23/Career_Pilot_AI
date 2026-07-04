@@ -10,6 +10,8 @@ def get_all_jobs():
     jobs = list(get_jobs_collection().find())
     for job in jobs:
         job["_id"] = str(job["_id"])
+        if "employer_id" in job:
+            job["employer_id"] = str(job["employer_id"])
     return jobs
 
 def get_job_by_id(job_id):
@@ -19,17 +21,32 @@ def get_job_by_id(job_id):
         job["_id"] = str(job["_id"])
     return job
 
-def create_job(title, description, required_skills):
-    """Creates a draft job post."""
+def create_job(employer_id, title, description, required_skills, company="", location="", job_type="Full-time", salary="", normalized_data=None):
+    """Creates a draft job post associated with an employer."""
     job = {
+        "employer_id": ObjectId(employer_id),
         "title": title,
+        "company": company,
+        "location": location,
+        "type": job_type,
+        "salary": salary,
         "description": description,
         "required_skills": [skill.strip() for skill in required_skills if skill.strip()],
-        "status": "draft"
+        "normalized_data": normalized_data or {},
+        "status": "published" # Setting to published directly so they appear in dashboard for now
     }
     result = get_jobs_collection().insert_one(job)
     job["_id"] = str(result.inserted_id)
+    job["employer_id"] = str(job["employer_id"])
     return job
+
+def get_jobs_by_employer(employer_id):
+    """Retrieves all jobs posted by a specific employer."""
+    jobs = list(get_jobs_collection().find({"employer_id": ObjectId(employer_id)}))
+    for job in jobs:
+        job["_id"] = str(job["_id"])
+        job["employer_id"] = str(job["employer_id"])
+    return jobs
 
 def update_job_status(job_id, status):
     """Updates the status of a job post (e.g. to 'published')."""
