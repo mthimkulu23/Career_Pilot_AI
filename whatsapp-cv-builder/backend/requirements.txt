@@ -1,0 +1,10 @@
+flask
+flask-cors
+pymongo
+dnspython
+python-dotenv
+openai
+requests
+mailtrap
+PyPDF2
+twilio
